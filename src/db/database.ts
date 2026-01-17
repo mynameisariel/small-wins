@@ -222,3 +222,96 @@ export const deleteAllEntries = async (): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * Generate test data for the past 2 months (for testing purposes)
+ */
+export const generateTestData = async (): Promise<void> => {
+  try {
+    const today = new Date(getTodayLocalDate() + 'T00:00:00');
+    const twoMonthsAgo = new Date(today);
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    // Sample highlights for variety
+    const highlights = [
+      'Finished reading a good book',
+      'Had a great conversation with a friend',
+      'Completed a workout at the gym',
+      'Cooked a delicious homemade meal',
+      'Learned something new today',
+      'Spent quality time with family',
+      'Finished a work project I was proud of',
+      'Went for a peaceful walk in nature',
+      'Tried a new coffee shop and loved it',
+      'Helped someone with a task',
+      'Practiced a new hobby',
+      'Watched a beautiful sunset',
+      'Had a productive day at work',
+      'Caught up with an old friend',
+      'Finally cleaned and organized my space',
+      'Enjoyed a relaxing evening with music',
+      'Made progress on a personal goal',
+      'Discovered a new favorite podcast',
+      'Had a good laugh with colleagues',
+      'Treated myself to something nice',
+      'Felt grateful for small moments',
+      'Completed a challenging task',
+      'Spent time in the garden',
+      'Watched a movie that moved me',
+      'Had a breakthrough moment',
+      'Enjoyed a quiet morning routine',
+      'Made someone smile today',
+      'Tried a new recipe that turned out great',
+      'Felt proud of a small achievement',
+      'Had a moment of clarity',
+      'Enjoyed some good music',
+      'Finished a creative project',
+      'Had meaningful conversations',
+      'Felt content and peaceful',
+      'Made good progress on my goals',
+      'Appreciated the little things',
+      'Had a day full of small joys',
+      'Felt energized and motivated',
+      'Enjoyed some alone time',
+      'Had fun with friends',
+    ];
+
+    // Mood distribution (1-5, with more positive moods)
+    const getRandomMood = (): number => {
+      const rand = Math.random();
+      if (rand < 0.1) return 1; // 10% Rough
+      if (rand < 0.2) return 2; // 10% Meh
+      if (rand < 0.4) return 3; // 20% Good
+      if (rand < 0.7) return 4; // 30% Great
+      return 5; // 30% Amazing
+    };
+
+    const entries: Array<{ date: string; mood: number; highlight: string }> = [];
+    const currentDate = new Date(twoMonthsAgo);
+
+    // Generate entries for the past ~60 days, but skip some days randomly (70% fill rate)
+    while (currentDate <= today) {
+      // Skip about 30% of days to make it realistic
+      if (Math.random() > 0.3) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const mood = getRandomMood();
+        const highlight = highlights[Math.floor(Math.random() * highlights.length)];
+        
+        entries.push({ date: dateStr, mood, highlight });
+      }
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Insert all entries (using upsert to avoid conflicts)
+    for (const entry of entries) {
+      await upsertEntry(entry.date, entry.mood, entry.highlight);
+    }
+
+    console.log(`✅ Generated ${entries.length} test entries`);
+  } catch (error) {
+    console.error('❌ Error generating test data:', error);
+    throw error;
+  }
+};

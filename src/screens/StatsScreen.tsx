@@ -149,7 +149,7 @@ export const StatsScreen: React.FC = () => {
         {/* Total Entries - Tappable */}
         <TouchableOpacity
           style={[styles.totalCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-          onPress={() => navigation.navigate('WinsList' as never)}
+          onPress={() => navigation.navigate('PastWins' as never)}
         >
           <View style={styles.totalCardContent}>
             <View>

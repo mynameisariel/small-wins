@@ -6,6 +6,7 @@ import { TodayScreen } from '../screens/TodayScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { WinsListScreen } from '../screens/WinsListScreen';
+import { PastWinsScreen } from '../screens/PastWinsScreen';
 import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
@@ -20,6 +21,11 @@ const StatsStack = () => {
       <Stack.Screen
         name="StatsMain"
         component={StatsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PastWins"
+        component={PastWinsScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import { deleteAllEntries } from '../db/database';
+import { deleteAllEntries, generateTestData } from '../db/database';
 import { useTheme } from '../context/ThemeContext';
 
 const NOTIFICATION_TIME_KEY = 'notification_time';
@@ -83,6 +83,27 @@ export const SettingsScreen: React.FC = () => {
     const displayHour = hour % 12 || 12;
     const displayMinute = minute.toString().padStart(2, '0');
     return `${displayHour}:${displayMinute} ${period}`;
+  };
+
+  const handleGenerateTestData = () => {
+    Alert.alert(
+      'Generate Test Data',
+      'This will create 2 months worth of sample reflections for testing. Existing entries will be updated if dates overlap.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Generate',
+          onPress: async () => {
+            try {
+              await generateTestData();
+              Alert.alert('Success', 'Test data generated! Check your Stats tab.');
+            } catch (error) {
+              Alert.alert('Error', 'Failed to generate test data');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleResetData = () => {
@@ -201,10 +222,22 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </SettingSection>
 
-        {/* Danger Zone */}
+        {/* Data Management */}
         <SettingSection title="Data">
           <TouchableOpacity
-            style={[styles.dangerButton, { borderColor: colors.danger }]}
+            style={[styles.testButton, { borderColor: colors.primary, backgroundColor: colors.card }]}
+            onPress={handleGenerateTestData}
+          >
+            <Text style={[styles.testButtonText, { color: colors.primary }]}>
+              🧪 Generate Test Data (2 months)
+            </Text>
+          </TouchableOpacity>
+          <Text style={[styles.testDescription, { color: colors.textSecondary }]}>
+            Create sample reflections for testing
+          </Text>
+          
+          <TouchableOpacity
+            style={[styles.dangerButton, { borderColor: colors.danger, marginTop: 16 }]}
             onPress={handleResetData}
           >
             <Text style={[styles.dangerButtonText, { color: colors.danger }]}>
@@ -282,6 +315,21 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  testButton: {
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  testButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  testDescription: {
+    fontSize: 12,
+    marginTop: 8,
+    textAlign: 'center',
   },
   dangerButton: {
     borderWidth: 2,
