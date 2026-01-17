@@ -9,6 +9,14 @@ export interface Entry {
   created_at: string;
 }
 
+export interface StreakStats {
+  currentStreak: number;
+  longestStreak: number;
+  totalEntries: number;
+  thisWeekCount: number;
+  thisMonthCount: number;
+}
+
 let db: SQLite.SQLiteDatabase;
 
 /**
@@ -110,5 +118,107 @@ export const getEntriesWithHighlights = async (): Promise<Entry[]> => {
   } catch (error) {
     console.error('Error getting highlights:', error);
     return [];
+  }
+};
+
+/**
+ * Calculate streak statistics
+ */
+export const getStreakStats = async (): Promise<StreakStats> => {
+  try {
+    const entries = await getAllEntries();
+    
+    if (entries.length === 0) {
+      return {
+        currentStreak: 0,
+        longestStreak: 0,
+        totalEntries: 0,
+        thisWeekCount: 0,
+        thisMonthCount: 0,
+      };
+    }
+
+    // Sort by date ascending for streak calculation
+    const sortedEntries = [...entries].sort((a, b) => 
+      a.date.localeCompare(b.date)
+    );
+
+    // Calculate current streak (working backwards from today)
+    let currentStreak = 0;
+    const today = getTodayLocalDate();
+    let checkDate = new Date(today + 'T00:00:00');
+    
+    for (let i = sortedEntries.length - 1; i >= 0; i--) {
+      const entryDate = sortedEntries[i].date;
+      const expectedDate = checkDate.toISOString().split('T')[0];
+      
+      if (entryDate === expectedDate) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else if (entryDate < expectedDate) {
+        // Gap found
+        break;
+      }
+    }
+
+    // Calculate longest streak
+    let longestStreak = 0;
+    let tempStreak = 1;
+    
+    for (let i = 1; i < sortedEntries.length; i++) {
+      const prevDate = new Date(sortedEntries[i - 1].date + 'T00:00:00');
+      const currDate = new Date(sortedEntries[i].date + 'T00:00:00');
+      const diffDays = Math.round((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        tempStreak++;
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 1;
+      }
+    }
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    // This week count
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekAgoStr = weekAgo.toISOString().split('T')[0];
+    const thisWeekCount = entries.filter(e => e.date >= weekAgoStr).length;
+
+    // This month count
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    const monthStartStr = monthStart.toISOString().split('T')[0];
+    const thisMonthCount = entries.filter(e => e.date >= monthStartStr).length;
+
+    return {
+      currentStreak,
+      longestStreak,
+      totalEntries: entries.length,
+      thisWeekCount,
+      thisMonthCount,
+    };
+  } catch (error) {
+    console.error('Error calculating streaks:', error);
+    return {
+      currentStreak: 0,
+      longestStreak: 0,
+      totalEntries: 0,
+      thisWeekCount: 0,
+      thisMonthCount: 0,
+    };
+  }
+};
+
+/**
+ * Delete all entries (for reset functionality)
+ */
+export const deleteAllEntries = async (): Promise<void> => {
+  try {
+    await db.runAsync('DELETE FROM entries');
+    console.log('✅ All entries deleted');
+  } catch (error) {
+    console.error('❌ Error deleting entries:', error);
+    throw error;
   }
 };

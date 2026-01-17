@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { Platform, Alert, View, Text, StyleSheet } from 'react-native';
+import { Alert, View, Text, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TabNavigator } from './src/navigation/TabNavigator';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { initDb } from './src/db/database';
+import { LogBox } from 'react-native';
 
-// Configure notification behavior - FIXED for SDK 53+
+// Suppress Expo Go notification warning (we're using local notifications only)
+LogBox.ignoreLogs(['expo-notifications: Android Push notifications']);
+
+// Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -19,8 +24,10 @@ Notifications.setNotificationHandler({
 });
 
 const NOTIFICATION_SCHEDULED_KEY = 'notification_scheduled';
+const NOTIFICATION_TIME_KEY = 'notification_time';
 
-export default function App() {
+function AppContent() {
+  const { activeTheme } = useTheme();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -29,12 +36,8 @@ export default function App() {
 
   const initialize = async () => {
     try {
-      // Initialize database
       await initDb();
-
-      // Request notification permissions and schedule
       await setupNotifications();
-
       setIsReady(true);
     } catch (error) {
       console.error('Initialization error:', error);
@@ -44,7 +47,6 @@ export default function App() {
 
   const setupNotifications = async () => {
     try {
-      // Request permissions
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
@@ -58,14 +60,22 @@ export default function App() {
         return;
       }
 
-      // Check if already scheduled
       const isScheduled = await AsyncStorage.getItem(NOTIFICATION_SCHEDULED_KEY);
       if (isScheduled === 'true') {
         console.log('Notifications already scheduled');
         return;
       }
 
-      // Schedule daily notification at 9 PM - FIXED trigger format
+      // Get saved time or use default (9 PM)
+      let hour = 21;
+      let minute = 0;
+      const savedTime = await AsyncStorage.getItem(NOTIFICATION_TIME_KEY);
+      if (savedTime) {
+        const parsed = JSON.parse(savedTime);
+        hour = parsed.hour;
+        minute = parsed.minute;
+      }
+
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Small Wins 🌟',
@@ -73,27 +83,23 @@ export default function App() {
           data: { screen: 'Today' },
         },
         trigger: {
-          // seconds: 10,
           type: Notifications.SchedulableTriggerInputTypes.DAILY,
-          hour: 13,
-          minute: 0,
+          hour,
+          minute,
           channelId: 'default',
         },
       });
 
-      // Mark as scheduled
       await AsyncStorage.setItem(NOTIFICATION_SCHEDULED_KEY, 'true');
-      console.log('✅ Daily notification scheduled for 9 PM');
+      console.log(`✅ Daily notification scheduled for ${hour}:${minute}`);
     } catch (error) {
       console.error('Notification setup error:', error);
     }
   };
 
-  // Handle notification tap
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        // User tapped notification - app will open to Today screen (default tab)
         console.log('Notification tapped:', response);
       }
     );
@@ -111,9 +117,17 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <StatusBar style="auto" />
+      <StatusBar style={activeTheme === 'dark' ? 'light' : 'dark'} />
       <TabNavigator />
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

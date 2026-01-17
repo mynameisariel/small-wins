@@ -12,8 +12,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
 import { getMoodById } from '../constants/moods';
+import { useTheme } from '../context/ThemeContext';
 
-export const WinsScreen: React.FC = () => {
+export const WinsListScreen: React.FC = () => {
+  const { colors } = useTheme();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,33 +47,48 @@ export const WinsScreen: React.FC = () => {
   const renderEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
     return (
-      <View style={styles.entryCard}>
+      <View style={[styles.entryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={styles.entryHeader}>
-          <Text style={styles.entryDate}>{formatDisplayDate(item.date)}</Text>
+          <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
+            {formatDisplayDate(item.date)}
+          </Text>
           {mood && (
-            <View
-              style={[styles.moodDot, { backgroundColor: mood.color }]}
-            />
+            <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
           )}
         </View>
-        <Text style={styles.entryHighlight}>{item.highlight}</Text>
+        <Text style={[styles.entryHighlight, { color: colors.text }]}>
+          {item.highlight}
+        </Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <View style={styles.header}>
-        <Text style={styles.title}>Small Wins 🌟</Text>
-        <Text style={styles.subtitle}>
-          {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'}
+        <Text style={[styles.title, { color: colors.text }]}>
+          All Wins 🌟
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {filteredEntries.length}{' '}
+          {filteredEntries.length === 1 ? 'entry' : 'entries'}
         </Text>
       </View>
 
       <TextInput
-        style={styles.searchInput}
+        style={[
+          styles.searchInput,
+          {
+            backgroundColor: colors.card,
+            color: colors.text,
+            borderColor: colors.border,
+          },
+        ]}
         placeholder="Search your wins..."
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={colors.textSecondary}
         value={searchQuery}
         onChangeText={handleSearch}
       />
@@ -83,7 +100,7 @@ export const WinsScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {searchQuery
                 ? 'No wins found'
                 : 'No wins yet!\nStart recording your daily highlights.'}
@@ -98,7 +115,6 @@ export const WinsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   header: {
     padding: 20,
@@ -107,35 +123,28 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#111827',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
   },
   searchInput: {
-    backgroundColor: '#F9FAFB',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    color: '#111827',
     marginHorizontal: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   entryCard: {
-    backgroundColor: '#F9FAFB',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   entryHeader: {
     flexDirection: 'row',
@@ -146,7 +155,6 @@ const styles = StyleSheet.create({
   entryDate: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
   },
   moodDot: {
     width: 12,
@@ -155,7 +163,6 @@ const styles = StyleSheet.create({
   },
   entryHighlight: {
     fontSize: 16,
-    color: '#111827',
     lineHeight: 24,
   },
   emptyState: {
@@ -165,7 +172,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#9CA3AF',
     textAlign: 'center',
     lineHeight: 24,
   },
