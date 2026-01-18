@@ -174,7 +174,7 @@ export const SettingsScreen: React.FC = () => {
             onPress={handleGenerateTestData}
           >
             <Text style={[styles.testButtonText, { color: colors.tabActive }]}>
-              🧪 Generate Test Data (2 months)
+              Generate Test Data (2 months)
             </Text>
           </TouchableOpacity>
           <Text style={[styles.testDescription, { color: colors.textSecondary }]}>
@@ -186,7 +186,7 @@ export const SettingsScreen: React.FC = () => {
             onPress={handleResetData}
           >
             <Text style={[styles.dangerButtonText, { color: colors.danger }]}>
-              🗑️ Reset All Data
+              Reset All Data
             </Text>
           </TouchableOpacity>
           <Text style={[styles.dangerWarning, { color: colors.textSecondary }]}>
