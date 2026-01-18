@@ -14,7 +14,6 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
 import { getMoodById } from '../constants/moods';
-import { useTheme } from '../context/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NOTE_WIDTH = SCREEN_WIDTH * 0.8;
@@ -32,7 +31,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 
 export const PastWinsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { colors } = useTheme();
   const [shuffledEntries, setShuffledEntries] = useState<Entry[]>([]);
   const [allEntries, setAllEntries] = useState<Entry[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -118,16 +116,16 @@ export const PastWinsScreen: React.FC = () => {
   const renderListEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
     return (
-      <View style={[styles.entryCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
+      <View style={styles.entryCard}>
         <View style={styles.entryHeader}>
-          <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
+          <Text style={styles.entryDate}>
             {formatDisplayDate(item.date)}
           </Text>
           {mood && (
             <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
           )}
         </View>
-        <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
+        <Text style={styles.entryHighlight}>
           {item.highlight}
         </Text>
       </View>
@@ -147,24 +145,22 @@ export const PastWinsScreen: React.FC = () => {
     if (shuffledEntries.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyEmoji, { color: colors.textSecondary }]}>
+          <Text style={styles.emptyEmoji}>
             🌟
           </Text>
-          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
+          <Text style={styles.emptyTitle}>
             No wins yet!
           </Text>
-          <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
+          <Text style={styles.emptyMessage}>
             Start recording your daily highlights to see them here.
           </Text>
           <TouchableOpacity
-            style={[styles.emptyButton, { backgroundColor: colors.buttonPrimary }]}
+            style={styles.emptyButton}
             onPress={() => {
               navigation.navigate('Today' as never);
             }}
           >
-            <Text style={[styles.emptyButtonText, { color: colors.buttonPrimaryText }]}>
-              Write Today's Win
-            </Text>
+            <Text style={styles.emptyButtonText}>Write Today's Win</Text>
           </TouchableOpacity>
         </View>
       );
@@ -202,8 +198,6 @@ export const PastWinsScreen: React.FC = () => {
           style={[
             styles.noteCard,
             {
-              backgroundColor: colors.cardBase,
-              borderColor: colors.border,
               transform: [
                 { translateX: isTopNote ? translateX : offsetX },
                 { translateY },
@@ -216,7 +210,7 @@ export const PastWinsScreen: React.FC = () => {
           ]}
         >
           <View style={styles.noteHeader}>
-            <Text style={[styles.noteDate, { color: colors.textSecondary }]}>
+            <Text style={styles.noteDate}>
               {formatDisplayDate(entry.date)}
             </Text>
             {mood && (
@@ -225,7 +219,7 @@ export const PastWinsScreen: React.FC = () => {
               </View>
             )}
           </View>
-          <Text style={[styles.noteText, { color: colors.textPrimary }]}>
+          <Text style={styles.noteText}>
             {entry.highlight}
           </Text>
         </Animated.View>
@@ -236,29 +230,26 @@ export const PastWinsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={['top']}
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Bar */}
-      <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
+      <View style={[styles.topBar, { borderBottomColor: '#E5E7EB', backgroundColor: '#DCC4C6' }]}>
         <TouchableOpacity
           style={styles.topButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.topButtonText, { color: colors.tabActive }]}>
+          <Text style={[styles.topButtonText, { color: '#111827' }]}>
             ← Back
           </Text>
         </TouchableOpacity>
 
         {viewMode === 'deck' && shuffledEntries.length > 0 && (
-          <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+          <Text style={[styles.progressText, { color: '#6B7280' }]}>
             {currentIndex + 1} / {shuffledEntries.length}
           </Text>
         )}
 
         {viewMode === 'list' && allEntries.length > 0 && (
-          <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+          <Text style={[styles.progressText, { color: '#6B7280' }]}>
             {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'}
           </Text>
         )}
@@ -267,7 +258,7 @@ export const PastWinsScreen: React.FC = () => {
           style={styles.topButton}
           onPress={() => setViewMode(viewMode === 'deck' ? 'list' : 'deck')}
         >
-          <Text style={[styles.topButtonText, { color: colors.tabActive }]}>
+          <Text style={[styles.topButtonText, { color: '#111827' }]}>
             {viewMode === 'deck' ? 'List View' : 'Deck View'}
           </Text>
         </TouchableOpacity>
@@ -301,16 +292,9 @@ export const PastWinsScreen: React.FC = () => {
       ) : (
         <View style={styles.listContainer}>
           <TextInput
-            style={[
-              styles.searchInput,
-              {
-                backgroundColor: colors.cardBase,
-                color: colors.textPrimary,
-                borderColor: colors.border,
-              },
-            ]}
+            style={styles.searchInput}
             placeholder="Search your wins..."
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={handleSearch}
           />
@@ -321,7 +305,7 @@ export const PastWinsScreen: React.FC = () => {
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                <Text style={styles.emptyText}>
                   {searchQuery
                     ? 'No wins found'
                     : 'No wins yet!\nStart recording your daily highlights.'}
@@ -338,6 +322,7 @@ export const PastWinsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#DCC4C6',
   },
   topBar: {
     flexDirection: 'row',
@@ -379,7 +364,9 @@ const styles = StyleSheet.create({
     maxHeight: NOTE_HEIGHT,
     borderRadius: 16,
     padding: 24,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -395,6 +382,7 @@ const styles = StyleSheet.create({
   noteDate: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#6B7280',
   },
   moodIndicator: {
     width: 32,
@@ -411,6 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 28,
     fontWeight: '400',
+    color: '#111827',
   },
   tapZones: {
     position: 'absolute',
@@ -434,7 +423,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 20,
     marginVertical: 16,
+    backgroundColor: '#FFFFFF',
+    color: '#111827',
     borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   listContent: {
     paddingHorizontal: 20,
@@ -444,7 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
+    backgroundColor: '#E8D5C4',
   },
   entryHeader: {
     flexDirection: 'row',
@@ -455,6 +447,7 @@ const styles = StyleSheet.create({
   entryDate: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#6B7280',
   },
   moodDot: {
     width: 12,
@@ -464,6 +457,7 @@ const styles = StyleSheet.create({
   entryHighlight: {
     fontSize: 16,
     lineHeight: 24,
+    color: '#111827',
   },
   emptyState: {
     alignItems: 'center',
@@ -474,6 +468,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+    color: '#6B7280',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -489,19 +484,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',
+    color: '#111827',
   },
   emptyMessage: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 24,
+    color: '#6B7280',
   },
   emptyButton: {
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
+    backgroundColor: '#3B82F6',
   },
   emptyButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

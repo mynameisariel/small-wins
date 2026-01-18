@@ -5,16 +5,16 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
 import { getMoodById } from '../constants/moods';
-import { useTheme } from '../context/ThemeContext';
 
 export const WinsListScreen: React.FC = () => {
-  const { colors } = useTheme();
+  const navigation = useNavigation();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,16 +46,18 @@ export const WinsListScreen: React.FC = () => {
   const renderEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
     return (
-      <View style={[styles.entryCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
+      <View style={styles.entryCard}>
         <View style={styles.entryHeader}>
-          <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
+          <Text style={styles.entryDate}>
             {formatDisplayDate(item.date)}
           </Text>
           {mood && (
-            <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
+            <View style={[styles.moodCircle, { backgroundColor: mood.color }]}>
+              <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+            </View>
           )}
         </View>
-        <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
+        <Text style={styles.entryHighlight}>
           {item.highlight}
         </Text>
       </View>
@@ -63,34 +65,35 @@ export const WinsListScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      edges={['top']}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
-          All Wins 🌟
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {/* Top Bar */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.topButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.topButtonText}>← Back</Text>
+        </TouchableOpacity>
+        
+        <Text style={styles.countText}>
+          {filteredEntries.length}/{entries.length}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {filteredEntries.length}{' '}
-          {filteredEntries.length === 1 ? 'entry' : 'entries'}
-        </Text>
+
+        <TouchableOpacity style={styles.topButton}>
+          <Text style={styles.topButtonText}>List View</Text>
+        </TouchableOpacity>
       </View>
 
-      <TextInput
-        style={[
-          styles.searchInput,
-          {
-            backgroundColor: colors.cardBase,
-            color: colors.textPrimary,
-            borderColor: colors.border,
-          },
-        ]}
-        placeholder="Search your wins..."
-        placeholderTextColor={colors.textSecondary}
-        value={searchQuery}
-        onChangeText={handleSearch}
-      />
+      {/* Search Input */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search your wins..."
+          placeholderTextColor="#9CA3AF"
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+      </View>
 
       <FlatList
         data={filteredEntries}
@@ -99,7 +102,7 @@ export const WinsListScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            <Text style={styles.emptyText}>
               {searchQuery
                 ? 'No wins found'
                 : 'No wins yet!\nStart recording your daily highlights.'}
@@ -114,36 +117,51 @@ export const WinsListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#DCC4C6',
   },
-  header: {
-    padding: 20,
-    paddingBottom: 12,
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 4,
+  topButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
-  subtitle: {
+  topButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  countText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   searchInput: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    marginHorizontal: 20,
-    marginBottom: 16,
-    borderWidth: 1,
+    color: '#111827',
   },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   entryCard: {
+    backgroundColor: '#E8D5C4',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
   },
   entryHeader: {
     flexDirection: 'row',
@@ -154,15 +172,22 @@ const styles = StyleSheet.create({
   entryDate: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#6B7280',
   },
-  moodDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  moodCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodEmoji: {
+    fontSize: 18,
   },
   entryHighlight: {
     fontSize: 16,
     lineHeight: 24,
+    color: '#111827',
   },
   emptyState: {
     alignItems: 'center',
@@ -173,5 +198,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+    color: '#6B7280',
   },
 });
