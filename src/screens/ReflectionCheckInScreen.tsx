@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,11 +20,23 @@ export const ReflectionCheckInScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { colors } = useTheme();
-  const [reflection, setReflection] = useState('');
+  const params = route.params as any;
+  
+  // Get params
+  const mood = params?.mood as number | undefined;
+  const editMode = params?.editMode as boolean | undefined;
+  const existingHighlight = params?.highlight as string | undefined;
+  const date = params?.date as string | undefined;
+  
+  const [reflection, setReflection] = useState(existingHighlight || '');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Get mood from navigation params
-  const mood = (route.params as any)?.mood as number | undefined;
+  // Initialize reflection from existing highlight if in edit mode
+  useEffect(() => {
+    if (existingHighlight) {
+      setReflection(existingHighlight);
+    }
+  }, [existingHighlight]);
 
   const handleSave = async () => {
     if (!mood) {
@@ -39,22 +51,27 @@ export const ReflectionCheckInScreen: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const todayDate = getTodayLocalDate();
-      await upsertEntry(todayDate, mood, reflection.trim() || null);
+      const entryDate = date || getTodayLocalDate();
+      await upsertEntry(entryDate, mood, reflection.trim() || null);
 
-      // Navigate to MainTabs with Stats tab
-      // Use reset to clear the stack and navigate to MainTabs
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'MainTabs' as never,
-            params: {
-              screen: 'Stats' as never,
-            } as never,
-          },
-        ],
-      });
+      // Navigate based on mode
+      if (editMode) {
+        // Edit mode: go back to Today tab
+        navigation.goBack();
+      } else {
+        // First-time flow: Navigate to MainTabs with Stats tab
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'MainTabs' as never,
+              params: {
+                screen: 'Stats' as never,
+              } as never,
+            },
+          ],
+        });
+      }
     } catch (error) {
       console.error('Error saving entry:', error);
       Alert.alert('Error', 'Failed to save your reflection. Please try again.');
@@ -76,7 +93,7 @@ export const ReflectionCheckInScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>
               Name one moment from today worth keeping.
             </Text>
           </View>
@@ -85,8 +102,8 @@ export const ReflectionCheckInScreen: React.FC = () => {
             style={[
               styles.textInput,
               {
-                backgroundColor: colors.card,
-                color: colors.text,
+                backgroundColor: colors.cardBase,
+                color: colors.textPrimary,
                 borderColor: colors.border,
               },
             ]}
@@ -103,7 +120,7 @@ export const ReflectionCheckInScreen: React.FC = () => {
             style={[
               styles.saveButton,
               {
-                backgroundColor: isSaving ? colors.border : colors.primary,
+                backgroundColor: isSaving ? colors.buttonDisabled : colors.buttonPrimary,
               },
             ]}
             onPress={handleSave}

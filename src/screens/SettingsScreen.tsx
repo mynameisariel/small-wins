@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,14 +13,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { deleteAllEntries, generateTestData } from '../db/database';
 import { useTheme } from '../context/ThemeContext';
+import { TimePicker } from '../components/TimePicker';
 
 const NOTIFICATION_TIME_KEY = 'notification_time';
 const NOTIFICATION_SCHEDULED_KEY = 'notification_scheduled';
 
 export const SettingsScreen: React.FC = () => {
-  const { theme, setTheme, colors, activeTheme } = useTheme();
+  const { colors } = useTheme();
   const [notificationHour, setNotificationHour] = useState(21);
   const [notificationMinute, setNotificationMinute] = useState(0);
+  const updateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadNotificationTime();
@@ -68,15 +70,14 @@ export const SettingsScreen: React.FC = () => {
       setNotificationHour(hour);
       setNotificationMinute(minute);
       
-      Alert.alert(
-        'Reminder Updated',
-        `Daily reminder set for ${formatTime(hour, minute)}`
-      );
+      // Silent update - no alert to avoid interrupting the picker experience
+      console.log(`Reminder updated to ${formatTime(hour, minute)}`);
     } catch (error) {
       console.error('Error updating notification:', error);
       Alert.alert('Error', 'Failed to update reminder time');
     }
   };
+
 
   const formatTime = (hour: number, minute: number) => {
     const period = hour >= 12 ? 'PM' : 'AM';
@@ -128,41 +129,13 @@ export const SettingsScreen: React.FC = () => {
     );
   };
 
-  const TimeOption: React.FC<{ hour: number; minute: number; label: string }> = ({
-    hour,
-    minute,
-    label,
-  }) => {
-    const isSelected = notificationHour === hour && notificationMinute === minute;
-    return (
-      <TouchableOpacity
-        style={[
-          styles.timeOption,
-          {
-            backgroundColor: isSelected ? colors.primary : colors.card,
-            borderColor: colors.border,
-          },
-        ]}
-        onPress={() => updateNotificationTime(hour, minute)}
-      >
-        <Text
-          style={[
-            styles.timeText,
-            { color: isSelected ? '#FFFFFF' : colors.text },
-          ]}
-        >
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
 
   const SettingSection: React.FC<{ title: string; children: React.ReactNode }> = ({
     title,
     children,
   }) => (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{title}</Text>
       {children}
     </View>
   );
@@ -174,13 +147,13 @@ export const SettingsScreen: React.FC = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
             Settings ⚙️
           </Text>
         </View>
 
         {/* Theme Settings */}
-        <SettingSection title="Appearance">
+        {/* <SettingSection title="Appearance">
           <View style={styles.themeButtons}>
             {(['light', 'dark', 'auto'] as const).map((t) => (
               <TouchableOpacity
@@ -205,30 +178,34 @@ export const SettingsScreen: React.FC = () => {
               </TouchableOpacity>
             ))}
           </View>
-        </SettingSection>
+        </SettingSection> */}
 
         {/* Notification Time */}
-        <SettingSection title="Daily Reminder">
-          <Text style={[styles.currentTime, { color: colors.textSecondary }]}>
-            Current: {formatTime(notificationHour, notificationMinute)}
-          </Text>
-          <View style={styles.timeGrid}>
-            <TimeOption hour={8} minute={0} label="8:00 AM" />
-            <TimeOption hour={12} minute={0} label="12:00 PM" />
-            <TimeOption hour={18} minute={0} label="6:00 PM" />
-            <TimeOption hour={21} minute={0} label="9:00 PM" />
-            <TimeOption hour={22} minute={0} label="10:00 PM" />
-            <TimeOption hour={23} minute={0} label="11:00 PM" />
-          </View>
+        <SettingSection title="Daily Reminders">
+          <TimePicker
+            hour={notificationHour}
+            minute={notificationMinute}
+            onTimeChange={(hour, minute) => {
+              setNotificationHour(hour);
+              setNotificationMinute(minute);
+              // Debounce notification update
+              if (updateTimerRef.current) {
+                clearTimeout(updateTimerRef.current);
+              }
+              updateTimerRef.current = setTimeout(() => {
+                updateNotificationTime(hour, minute);
+              }, 1000); // Update 1 second after user stops scrolling
+            }}
+          />
         </SettingSection>
 
         {/* Data Management */}
         <SettingSection title="Data">
           <TouchableOpacity
-            style={[styles.testButton, { borderColor: colors.primary, backgroundColor: colors.card }]}
+            style={[styles.testButton, { borderColor: colors.buttonPrimary, backgroundColor: colors.cardBase }]}
             onPress={handleGenerateTestData}
           >
-            <Text style={[styles.testButtonText, { color: colors.primary }]}>
+            <Text style={[styles.testButtonText, { color: colors.buttonPrimary }]}>
               🧪 Generate Test Data (2 months)
             </Text>
           </TouchableOpacity>
