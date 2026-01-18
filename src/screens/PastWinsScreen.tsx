@@ -8,7 +8,6 @@ import {
   Dimensions,
   FlatList,
   TextInput,
-  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -218,13 +217,9 @@ export const PastWinsScreen: React.FC = () => {
             },
           ]}
         >
-          <ImageBackground
-            source={require('../../assets/prompt.png')}
-            style={styles.noteCard}
-            resizeMode="cover"
-          >
+          <View style={[styles.noteCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
             <View style={styles.noteHeader}>
-              <Text style={styles.noteDate}>
+              <Text style={[styles.noteDate, { color: colors.textSecondary }]}>
                 {formatDisplayDate(entry.date)}
               </Text>
               {mood && getMoodImage(mood.key || mood.label.toLowerCase()) && (
@@ -237,10 +232,10 @@ export const PastWinsScreen: React.FC = () => {
                 </View>
               )}
             </View>
-            <Text style={styles.noteText}>
+            <Text style={[styles.noteText, { color: colors.textPrimary }]}>
               {entry.highlight}
             </Text>
-          </ImageBackground>
+          </View>
         </Animated.View>
       );
     }
@@ -392,6 +387,8 @@ const styles = StyleSheet.create({
     minHeight: NOTE_HEIGHT * 0.6,
     padding: 24,
     justifyContent: 'space-between',
+    borderRadius: 12,
+    borderWidth: 1,
   },
   noteHeader: {
     flexDirection: 'row',
@@ -402,7 +399,6 @@ const styles = StyleSheet.create({
   noteDate: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
   },
   moodIndicator: {
     width: 32,
@@ -420,7 +416,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 28,
     fontWeight: '400',
-    color: '#6B5B4C', // Use theme textPrimary color for visibility on Vector.png
   },
   tapZones: {
     position: 'absolute',
