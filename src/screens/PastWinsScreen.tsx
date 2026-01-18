@@ -16,6 +16,7 @@ import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
 import { getMoodById, getMoodImage } from '../constants/moods';
 import { Image } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NOTE_WIDTH = SCREEN_WIDTH * 0.8;
@@ -33,6 +34,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 
 export const PastWinsScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const [shuffledEntries, setShuffledEntries] = useState<Entry[]>([]);
   const [allEntries, setAllEntries] = useState<Entry[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -117,17 +119,25 @@ export const PastWinsScreen: React.FC = () => {
 
   const renderListEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
+    const moodKey = mood?.key || mood?.label.toLowerCase();
+    const moodImage = moodKey ? getMoodImage(moodKey) : null;
     return (
-      <View style={styles.entryCard}>
+      <View style={[styles.entryCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
         <View style={styles.entryHeader}>
-          <Text style={styles.entryDate}>
+          <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
             {formatDisplayDate(item.date)}
           </Text>
-          {mood && (
-            <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
+          {moodImage && (
+            <View style={styles.moodIconContainer}>
+              <Image
+                source={moodImage}
+                style={styles.moodImage}
+                resizeMode="contain"
+              />
+            </View>
           )}
         </View>
-        <Text style={styles.entryHighlight}>
+        <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
           {item.highlight}
         </Text>
       </View>
@@ -147,9 +157,6 @@ export const PastWinsScreen: React.FC = () => {
     if (shuffledEntries.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>
-            🌟
-          </Text>
           <Text style={styles.emptyTitle}>
             No wins yet!
           </Text>
@@ -212,7 +219,7 @@ export const PastWinsScreen: React.FC = () => {
           ]}
         >
           <ImageBackground
-            source={require('../../assets/Vector.png')}
+            source={require('../../assets/prompt.png')}
             style={styles.noteCard}
             resizeMode="cover"
           >
@@ -244,24 +251,24 @@ export const PastWinsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Bar */}
-      <View style={[styles.topBar, { borderBottomColor: '#E5E7EB', backgroundColor: '#DCC4C6' }]}>
+      <View style={[styles.topBar, { borderBottomColor: colors.border, backgroundColor: colors.background }]}>
         <TouchableOpacity
           style={styles.topButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.topButtonText, { color: '#111827' }]}>
+          <Text style={[styles.topButtonText, { color: colors.textPrimary }]}>
             ← Back
           </Text>
         </TouchableOpacity>
 
         {viewMode === 'deck' && shuffledEntries.length > 0 && (
-          <Text style={[styles.progressText, { color: '#6B7280' }]}>
+          <Text style={[styles.progressText, { color: colors.textSecondary }]}>
             {currentIndex + 1} / {shuffledEntries.length}
           </Text>
         )}
 
         {viewMode === 'list' && allEntries.length > 0 && (
-          <Text style={[styles.progressText, { color: '#6B7280' }]}>
+          <Text style={[styles.progressText, { color: colors.textSecondary }]}>
             {filteredEntries.length} {filteredEntries.length === 1 ? 'entry' : 'entries'}
           </Text>
         )}
@@ -270,7 +277,7 @@ export const PastWinsScreen: React.FC = () => {
           style={styles.topButton}
           onPress={() => setViewMode(viewMode === 'deck' ? 'list' : 'deck')}
         >
-          <Text style={[styles.topButtonText, { color: '#111827' }]}>
+          <Text style={[styles.topButtonText, { color: colors.textPrimary }]}>
             {viewMode === 'deck' ? 'List View' : 'Deck View'}
           </Text>
         </TouchableOpacity>
@@ -304,9 +311,9 @@ export const PastWinsScreen: React.FC = () => {
       ) : (
         <View style={styles.listContainer}>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { backgroundColor: colors.cardBase, color: colors.textPrimary, borderColor: colors.border }]}
             placeholder="Search your wins..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={handleSearch}
           />
@@ -334,7 +341,6 @@ export const PastWinsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#DCC4C6',
   },
   topBar: {
     flexDirection: 'row',
@@ -438,10 +444,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 20,
     marginVertical: 16,
-    backgroundColor: '#FFFFFF',
-    color: '#111827',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   listContent: {
     paddingHorizontal: 20,
@@ -451,7 +454,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    backgroundColor: '#E8D5C4',
+    borderWidth: 1,
   },
   entryHeader: {
     flexDirection: 'row',
@@ -462,17 +465,16 @@ const styles = StyleSheet.create({
   entryDate: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
   },
-  moodDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  moodIconContainer: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   entryHighlight: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#111827',
   },
   emptyState: {
     alignItems: 'center',

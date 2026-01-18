@@ -6,16 +6,19 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Image,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
 import { getMoodById, getMoodImage } from '../constants/moods';
-import { Image } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 export const WinsListScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,55 +49,66 @@ export const WinsListScreen: React.FC = () => {
 
   const renderEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
+    const moodKey = mood?.key || mood?.label.toLowerCase();
+    const moodImage = moodKey ? getMoodImage(moodKey) : null;
+    
     return (
-      <View style={styles.entryCard}>
-        <View style={styles.entryHeader}>
-          <Text style={styles.entryDate}>
-            {formatDisplayDate(item.date)}
-          </Text>
-          {mood && getMoodImage(mood.key || mood.label.toLowerCase()) && (
-            <View style={styles.moodCircle}>
-              <Image
-                source={getMoodImage(mood.key || mood.label.toLowerCase())!}
-                style={styles.moodImage}
-                resizeMode="contain"
-              />
-            </View>
-          )}
-        </View>
-        <Text style={styles.entryHighlight}>
-          {item.highlight}
-        </Text>
+      <View style={styles.entryCardContainer}>
+        <ImageBackground
+          source={require('../../assets/prompt.png')}
+          style={styles.entryCard}
+          resizeMode="cover"
+        >
+          <View style={styles.entryHeader}>
+            <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
+              {formatDisplayDate(item.date)}
+            </Text>
+            {moodImage && (
+              <View style={styles.moodIconContainer}>
+                <Image
+                  source={moodImage}
+                  style={styles.moodIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+          </View>
+          <View style={styles.entryContent}>
+            <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
+              {item.highlight}
+            </Text>
+          </View>
+        </ImageBackground>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Top Bar */}
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={styles.topButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.topButtonText}>← Back</Text>
+          <Text style={[styles.topButtonText, { color: colors.textPrimary }]}>← Back</Text>
         </TouchableOpacity>
         
-        <Text style={styles.countText}>
+        <Text style={[styles.countText, { color: colors.textSecondary }]}>
           {filteredEntries.length}/{entries.length}
         </Text>
 
         <TouchableOpacity style={styles.topButton}>
-          <Text style={styles.topButtonText}>List View</Text>
+          <Text style={[styles.topButtonText, { color: colors.textPrimary }]}>List View</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search Input */}
       <View style={styles.searchContainer}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.cardBase, color: colors.textPrimary, borderColor: colors.border }]}
           placeholder="Search your wins..."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.textSecondary}
           value={searchQuery}
           onChangeText={handleSearch}
         />
@@ -107,7 +121,7 @@ export const WinsListScreen: React.FC = () => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {searchQuery
                 ? 'No wins found'
                 : 'No wins yet!\nStart recording your daily highlights.'}
@@ -122,7 +136,6 @@ export const WinsListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#DCC4C6',
   },
   topBar: {
     flexDirection: 'row',
@@ -131,7 +144,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
   },
   topButton: {
     paddingVertical: 4,
@@ -140,61 +152,69 @@ const styles = StyleSheet.create({
   topButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
   },
   countText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
   },
   searchContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
   searchInput: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 12,
     fontSize: 16,
-    color: '#111827',
+    borderWidth: 1,
   },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  entryCard: {
-    backgroundColor: '#E8D5C4',
-    borderRadius: 12,
-    padding: 16,
+  entryCardContainer: {
     marginBottom: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  entryCard: {
+    padding: 20,
+    minHeight: 120,
+    justifyContent: 'space-between',
   },
   entryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  entryContent: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
   },
   entryDate: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
   },
-  moodCircle: {
+  moodIconContainer: {
     width: 32,
     height: 32,
-    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
   },
-  moodImage: {
-    width: 24,
-    height: 24,
+  moodIcon: {
+    width: 28,
+    height: 28,
   },
   entryHighlight: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#111827',
+    textAlign: 'center',
   },
   emptyState: {
     alignItems: 'center',
@@ -205,6 +225,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
-    color: '#6B7280',
   },
 });

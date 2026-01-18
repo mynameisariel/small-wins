@@ -54,7 +54,7 @@ export const SettingsScreen: React.FC = () => {
       // Reschedule with new time
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Small Wins 🌟',
+          title: 'Small Wins',
           body: "What's one good thing that happened today?",
           data: { screen: 'Today' },
         },
@@ -144,7 +144,7 @@ export const SettingsScreen: React.FC = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>
-            Settings ⚙️
+            Settings
           </Text>
         </View>
 

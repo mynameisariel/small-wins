@@ -87,7 +87,6 @@ export const MainTabsNavigator: React.FC = () => {
         component={TodayStack}
         options={{
           tabBarLabel: 'Today',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📝</Text>,
         }}
       />
       <Tab.Screen
@@ -95,7 +94,6 @@ export const MainTabsNavigator: React.FC = () => {
         component={StatsStack}
         options={{
           tabBarLabel: 'Stats',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📊</Text>,
         }}
       />
       <Tab.Screen
@@ -103,7 +101,6 @@ export const MainTabsNavigator: React.FC = () => {
         component={SettingsScreen}
         options={{
           tabBarLabel: 'Settings',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>⚙️</Text>,
         }}
       />
     </Tab.Navigator>
