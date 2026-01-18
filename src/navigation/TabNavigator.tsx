@@ -42,7 +42,7 @@ const StatsStack = () => {
   );
 };
 
-export const TabNavigator: React.FC = () => {
+export const MainTabsNavigator: React.FC = () => {
   const { colors } = useTheme();
   
   return (
