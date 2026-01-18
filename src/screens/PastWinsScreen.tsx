@@ -244,7 +244,7 @@ export const PastWinsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       {/* Top Bar */}
       <View style={[styles.topBar, { borderBottomColor: colors.border, backgroundColor: colors.background }]}>
         <TouchableOpacity
