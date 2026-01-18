@@ -23,3 +23,6 @@ export const useTheme = () => {
   }
   return context;
 };
+
+// Export helper for StatusBar (always use dark text on our pale background)
+export const getStatusBarStyle = () => 'dark' as const;

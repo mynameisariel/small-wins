@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,6 +14,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { getTodayLocalDate } from '../db/dateUtils';
 import { upsertEntry } from '../db/database';
 import { useTheme } from '../context/ThemeContext';
+import { PrimaryButton } from '../components/PrimaryButton';
 
 export const ReflectionCheckInScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -44,11 +44,6 @@ export const ReflectionCheckInScreen: React.FC = () => {
       return;
     }
 
-    if (!reflection.trim()) {
-      // Allow empty but suggest at least 1 character
-      // For simplicity, we'll just allow empty and save anyway
-    }
-
     setIsSaving(true);
     try {
       const entryDate = date || getTodayLocalDate();
@@ -56,10 +51,10 @@ export const ReflectionCheckInScreen: React.FC = () => {
 
       // Navigate based on mode
       if (editMode) {
-        // Edit mode: go back to Today tab
-        navigation.goBack();
+        // Edit mode: go back to Today tab (TodayMain screen)
+        navigation.navigate('TodayMain' as never);
       } else {
-        // First-time flow: Navigate to MainTabs with Stats tab
+        // First-time daily flow: Navigate to MainTabs with Stats tab
         navigation.reset({
           index: 0,
           routes: [
@@ -116,21 +111,12 @@ export const ReflectionCheckInScreen: React.FC = () => {
             textAlignVertical="top"
           />
 
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              {
-                backgroundColor: isSaving ? colors.buttonDisabled : colors.buttonPrimary,
-              },
-            ]}
+          <PrimaryButton
+            title={isSaving ? 'Saving...' : 'Save'}
             onPress={handleSave}
             disabled={isSaving}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.saveButtonText}>
-              {isSaving ? 'Saving...' : 'Save'}
-            </Text>
-          </TouchableOpacity>
+            variant="save"
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -165,16 +151,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 32,
     lineHeight: 24,
-  },
-  saveButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });

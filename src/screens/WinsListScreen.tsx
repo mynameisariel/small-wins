@@ -5,7 +5,6 @@ import {
   FlatList,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -47,7 +46,7 @@ export const WinsListScreen: React.FC = () => {
   const renderEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
     return (
-      <View style={[styles.entryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[styles.entryCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
         <View style={styles.entryHeader}>
           <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
             {formatDisplayDate(item.date)}
@@ -56,7 +55,7 @@ export const WinsListScreen: React.FC = () => {
             <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
           )}
         </View>
-        <Text style={[styles.entryHighlight, { color: colors.text }]}>
+        <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
           {item.highlight}
         </Text>
       </View>
@@ -69,7 +68,7 @@ export const WinsListScreen: React.FC = () => {
       edges={['top']}
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
           All Wins 🌟
         </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -82,8 +81,8 @@ export const WinsListScreen: React.FC = () => {
         style={[
           styles.searchInput,
           {
-            backgroundColor: colors.card,
-            color: colors.text,
+            backgroundColor: colors.cardBase,
+            color: colors.textPrimary,
             borderColor: colors.border,
           },
         ]}

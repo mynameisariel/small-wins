@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,21 +7,47 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { MOODS } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
 
 export const MoodCheckInScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { colors } = useTheme();
-  const [selectedMood, setSelectedMood] = useState<number | null>(null);
+  const params = route.params as any;
+  
+  // Get params
+  const existingMood = params?.existingMood as number | undefined;
+  const existingHighlight = params?.existingHighlight as string | undefined;
+  const existingDate = params?.existingDate as string | undefined;
+  const editMode = params?.editMode as boolean | undefined;
+  
+  const [selectedMood, setSelectedMood] = useState<number | null>(existingMood || null);
+
+  useEffect(() => {
+    if (existingMood) {
+      setSelectedMood(existingMood);
+    }
+  }, [existingMood]);
 
   const handleSave = () => {
     if (selectedMood === null) {
       return; // Disabled button handles this
     }
-    // Navigate to ReflectionCheckInScreen with selected mood
-    navigation.navigate('ReflectionCheckIn' as never, { mood: selectedMood } as never);
+    
+    if (editMode) {
+      // Edit mode: navigate to reflection edit screen with existing data
+      navigation.navigate('ReflectionCheckInEdit' as never, {
+        mood: selectedMood,
+        highlight: existingHighlight,
+        editMode: true,
+        date: existingDate,
+      } as never);
+    } else {
+      // Daily flow: navigate to reflection check-in
+      navigation.navigate('ReflectionCheckIn' as never, { mood: selectedMood } as never);
+    }
   };
 
   return (
@@ -34,7 +60,7 @@ export const MoodCheckInScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
             In this moment, how do you feel?
           </Text>
         </View>
@@ -48,8 +74,8 @@ export const MoodCheckInScreen: React.FC = () => {
                 style={[
                   styles.moodButton,
                   {
-                    backgroundColor: isSelected ? colors.primary : colors.card,
-                    borderColor: isSelected ? colors.primary : colors.border,
+                    backgroundColor: isSelected ? colors.tabActive : colors.cardBase,
+                    borderColor: isSelected ? colors.tabActive : colors.border,
                     borderWidth: isSelected ? 2 : 1,
                   },
                 ]}
@@ -72,7 +98,7 @@ export const MoodCheckInScreen: React.FC = () => {
                   style={[
                     styles.moodLabel,
                     {
-                      color: isSelected ? colors.primary : colors.text,
+                      color: isSelected ? colors.buttonPrimaryText : colors.textPrimary,
                     },
                   ]}
                 >
@@ -88,7 +114,7 @@ export const MoodCheckInScreen: React.FC = () => {
             styles.saveButton,
             {
               backgroundColor:
-                selectedMood !== null ? colors.primary : colors.border,
+                selectedMood !== null ? colors.buttonPrimary : colors.buttonDisabled,
             },
           ]}
           onPress={handleSave}
@@ -98,10 +124,10 @@ export const MoodCheckInScreen: React.FC = () => {
           <Text
             style={[
               styles.saveButtonText,
-              { color: selectedMood !== null ? '#FFFFFF' : colors.textSecondary },
+              { color: selectedMood !== null ? colors.buttonPrimaryText : colors.textTertiary },
             ]}
           >
-            Save
+            {editMode ? 'Next' : 'Save'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

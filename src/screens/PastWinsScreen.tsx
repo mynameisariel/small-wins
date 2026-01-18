@@ -18,7 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NOTE_WIDTH = SCREEN_WIDTH * 0.8;
-const NOTE_HEIGHT = SCREEN_HEIGHT * 0.6; // Reduced from 0.75
+const NOTE_HEIGHT = SCREEN_HEIGHT * 0.6;
 
 // Fisher-Yates shuffle
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -118,7 +118,7 @@ export const PastWinsScreen: React.FC = () => {
   const renderListEntry = ({ item }: { item: Entry }) => {
     const mood = item.mood ? getMoodById(item.mood) : null;
     return (
-      <View style={[styles.entryCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[styles.entryCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
         <View style={styles.entryHeader}>
           <Text style={[styles.entryDate, { color: colors.textSecondary }]}>
             {formatDisplayDate(item.date)}
@@ -127,7 +127,7 @@ export const PastWinsScreen: React.FC = () => {
             <View style={[styles.moodDot, { backgroundColor: mood.color }]} />
           )}
         </View>
-        <Text style={[styles.entryHighlight, { color: colors.text }]}>
+        <Text style={[styles.entryHighlight, { color: colors.textPrimary }]}>
           {item.highlight}
         </Text>
       </View>
@@ -150,19 +150,21 @@ export const PastWinsScreen: React.FC = () => {
           <Text style={[styles.emptyEmoji, { color: colors.textSecondary }]}>
             🌟
           </Text>
-          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>
             No wins yet!
           </Text>
           <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
             Start recording your daily highlights to see them here.
           </Text>
           <TouchableOpacity
-            style={[styles.emptyButton, { backgroundColor: colors.primary }]}
+            style={[styles.emptyButton, { backgroundColor: colors.buttonPrimary }]}
             onPress={() => {
               navigation.navigate('Today' as never);
             }}
           >
-            <Text style={styles.emptyButtonText}>Write Today's Win</Text>
+            <Text style={[styles.emptyButtonText, { color: colors.buttonPrimaryText }]}>
+              Write Today's Win
+            </Text>
           </TouchableOpacity>
         </View>
       );
@@ -200,7 +202,7 @@ export const PastWinsScreen: React.FC = () => {
           style={[
             styles.noteCard,
             {
-              backgroundColor: colors.card,
+              backgroundColor: colors.cardBase,
               borderColor: colors.border,
               transform: [
                 { translateX: isTopNote ? translateX : offsetX },
@@ -223,7 +225,7 @@ export const PastWinsScreen: React.FC = () => {
               </View>
             )}
           </View>
-          <Text style={[styles.noteText, { color: colors.text }]}>
+          <Text style={[styles.noteText, { color: colors.textPrimary }]}>
             {entry.highlight}
           </Text>
         </Animated.View>
@@ -244,7 +246,7 @@ export const PastWinsScreen: React.FC = () => {
           style={styles.topButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={[styles.topButtonText, { color: colors.primary }]}>
+          <Text style={[styles.topButtonText, { color: colors.tabActive }]}>
             ← Back
           </Text>
         </TouchableOpacity>
@@ -265,7 +267,7 @@ export const PastWinsScreen: React.FC = () => {
           style={styles.topButton}
           onPress={() => setViewMode(viewMode === 'deck' ? 'list' : 'deck')}
         >
-          <Text style={[styles.topButtonText, { color: colors.primary }]}>
+          <Text style={[styles.topButtonText, { color: colors.tabActive }]}>
             {viewMode === 'deck' ? 'List View' : 'Deck View'}
           </Text>
         </TouchableOpacity>
@@ -302,8 +304,8 @@ export const PastWinsScreen: React.FC = () => {
             style={[
               styles.searchInput,
               {
-                backgroundColor: colors.card,
-                color: colors.text,
+                backgroundColor: colors.cardBase,
+                color: colors.textPrimary,
                 borderColor: colors.border,
               },
             ]}
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
   },
   tapZones: {
     position: 'absolute',
-    top: 100, // Below top bar (approximate)
+    top: 100,
     bottom: 0,
     left: 0,
     right: 0,
@@ -500,7 +502,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   emptyButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

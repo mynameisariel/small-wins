@@ -7,10 +7,23 @@ import { StatsScreen } from '../screens/StatsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { WinsListScreen } from '../screens/WinsListScreen';
 import { PastWinsScreen } from '../screens/PastWinsScreen';
+import { MoodCheckInScreen } from '../screens/MoodCheckInScreen';
+import { ReflectionCheckInScreen } from '../screens/ReflectionCheckInScreen';
 import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+
+// Today Stack Navigator (for edit flow with tabs visible)
+const TodayStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="TodayMain" component={TodayScreen} />
+      <Stack.Screen name="MoodCheckInEdit" component={MoodCheckInScreen} />
+      <Stack.Screen name="ReflectionCheckInEdit" component={ReflectionCheckInScreen} />
+    </Stack.Navigator>
+  );
+};
 
 // Stats Stack Navigator (for nested navigation)
 const StatsStack = () => {
@@ -35,7 +48,7 @@ const StatsStack = () => {
           headerTitle: 'All Wins',
           headerBackTitle: 'Back',
           headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.primary,
+          headerTintColor: colors.tabActive,
         }}
       />
     </Stack.Navigator>
@@ -49,8 +62,8 @@ export const MainTabsNavigator: React.FC = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
@@ -71,7 +84,7 @@ export const MainTabsNavigator: React.FC = () => {
     >
       <Tab.Screen
         name="Today"
-        component={TodayScreen}
+        component={TodayStack}
         options={{
           tabBarLabel: 'Today',
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📝</Text>,

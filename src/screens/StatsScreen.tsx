@@ -15,7 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export const StatsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { colors, activeTheme } = useTheme();
+  const { colors } = useTheme();
   const [markedDates, setMarkedDates] = useState<any>({});
   const [stats, setStats] = useState<StreakStats>({
     currentStreak: 0,
@@ -42,7 +42,7 @@ export const StatsScreen: React.FC = () => {
               backgroundColor: mood.color,
             },
             text: {
-              color: '#FFFFFF',
+              color: colors.buttonPrimaryText,
               fontWeight: 'bold',
             },
           },
@@ -67,17 +67,17 @@ export const StatsScreen: React.FC = () => {
     onPress?: () => void;
   }> = ({ title, value, subtitle, onPress }) => (
     <TouchableOpacity
-      style={[styles.statCard, { backgroundColor: colors.card }]}
+      style={[styles.statCard, { backgroundColor: colors.cardBase }]}
       onPress={onPress}
       disabled={!onPress}
       activeOpacity={onPress ? 0.7 : 1}
     >
-      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.statValue, { color: colors.textPrimary }]}>{value}</Text>
       <Text style={[styles.statTitle, { color: colors.textSecondary }]}>
         {title}
       </Text>
       {subtitle && (
-        <Text style={[styles.statSubtitle, { color: colors.primary }]}>
+        <Text style={[styles.statSubtitle, { color: colors.tabActive }]}>
           {subtitle}
         </Text>
       )}
@@ -91,14 +91,14 @@ export const StatsScreen: React.FC = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
             Stats 📊
           </Text>
         </View>
 
         {/* Mood Calendar */}
         <View style={styles.calendarSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
             Mood Colors 🎨
           </Text>
           
@@ -107,18 +107,18 @@ export const StatsScreen: React.FC = () => {
             markedDates={markedDates}
             theme={{
               backgroundColor: colors.background,
-              calendarBackground: colors.card,
+              calendarBackground: colors.cardBase,
               textSectionTitleColor: colors.textSecondary,
-              selectedDayBackgroundColor: colors.primary,
-              selectedDayTextColor: '#FFFFFF',
-              todayTextColor: colors.primary,
-              dayTextColor: colors.text,
-              textDisabledColor: colors.textSecondary,
-              monthTextColor: colors.text,
+              selectedDayBackgroundColor: colors.tabActive,
+              selectedDayTextColor: colors.buttonPrimaryText,
+              todayTextColor: colors.tabActive,
+              dayTextColor: colors.textPrimary,
+              textDisabledColor: colors.textTertiary,
+              monthTextColor: colors.textPrimary,
               textMonthFontWeight: 'bold',
               textMonthFontSize: 18,
             }}
-            style={[styles.calendar, { backgroundColor: colors.card }]}
+            style={[styles.calendar, { backgroundColor: colors.cardBase }]}
           />
         </View>
 
@@ -135,32 +135,21 @@ export const StatsScreen: React.FC = () => {
           />
         </View>
 
-        {/* <View style={styles.statsGrid}>
-          <StatCard
-            title="This Week"
-            value={stats.thisWeekCount}
-          />
-          <StatCard
-            title="This Month"
-            value={stats.thisMonthCount}
-          />
-        </View> */}
-
         {/* Total Entries - Tappable */}
         <TouchableOpacity
-          style={[styles.totalCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+          style={[styles.totalCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}
           onPress={() => navigation.navigate('PastWins' as never)}
         >
           <View style={styles.totalCardContent}>
             <View>
-              <Text style={[styles.totalValue, { color: colors.text }]}>
+              <Text style={[styles.totalValue, { color: colors.textPrimary }]}>
                 {stats.totalEntries}
               </Text>
               <Text style={[styles.totalTitle, { color: colors.textSecondary }]}>
                 Total Reflections 🌟
               </Text>
             </View>
-            <Text style={[styles.arrow, { color: colors.primary }]}>→</Text>
+            <Text style={[styles.arrow, { color: colors.tabActive }]}>→</Text>
           </View>
         </TouchableOpacity>
 

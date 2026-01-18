@@ -5,7 +5,7 @@ import { Alert, View, Text, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootNavigator } from './src/navigation/RootNavigator';
-import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { ThemeProvider, getStatusBarStyle } from './src/context/ThemeContext';
 import { initDb } from './src/db/database';
 import { LogBox } from 'react-native';
 
@@ -27,7 +27,6 @@ const NOTIFICATION_SCHEDULED_KEY = 'notification_scheduled';
 const NOTIFICATION_TIME_KEY = 'notification_time';
 
 function AppContent() {
-  const { activeTheme } = useTheme();
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -117,7 +116,7 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <StatusBar style={activeTheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={getStatusBarStyle()} />
       <RootNavigator />
     </NavigationContainer>
   );

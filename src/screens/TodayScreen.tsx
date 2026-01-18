@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import { getEntryByDate, Entry } from '../db/database';
 import { getMoodById } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
 import { BlobCard } from '../components/BlobCard';
-import { MoodIcon } from '../components/MoodIcon';
 
 export const TodayScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -33,37 +32,35 @@ export const TodayScreen: React.FC = () => {
   );
 
   const handleEditReflection = () => {
-    // Navigate to ReflectionCheckInScreen with existing mood and highlight for editing
     if (entry) {
-      navigation.navigate('ReflectionCheckIn' as never, {
+      // Navigate to edit screen in nested stack (tabs stay visible)
+      navigation.navigate('ReflectionCheckInEdit' as never, {
         mood: entry.mood,
         highlight: entry.highlight,
         editMode: true,
         date: todayDate,
       } as never);
     } else {
-      // If no entry, go to mood check-in flow
-      navigation.navigate('MoodCheckIn' as never);
+      // Shouldn't happen, but fallback
+      navigation.navigate('MoodCheckInEdit' as never);
     }
   };
 
   const handleEditMood = () => {
-    // Navigate to MoodCheckInScreen with existing mood pre-selected
-    if (entry?.mood) {
-      // For now, just navigate to mood screen - user will select new mood
-      // Then navigate to reflection screen with new mood and existing highlight
-      navigation.navigate('MoodCheckIn' as never, {
+    if (entry) {
+      // Navigate to mood edit screen in nested stack (tabs stay visible)
+      navigation.navigate('MoodCheckInEdit' as never, {
+        existingMood: entry.mood,
         existingHighlight: entry.highlight,
         existingDate: todayDate,
         editMode: true,
       } as never);
     } else {
-      navigation.navigate('MoodCheckIn' as never);
+      navigation.navigate('MoodCheckInEdit' as never);
     }
   };
 
-  // If no entry exists, this shouldn't happen (first-open flow handles it)
-  // But as fallback, show empty state with prompt to create entry
+  // If no entry exists, show empty state
   if (!entry) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
@@ -111,7 +108,6 @@ export const TodayScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <View style={styles.moodWrapper}>
-              {/* Use MoodIcon component or simple placeholder for now */}
               <View style={[styles.moodBlob, { backgroundColor: colors.cardBase }]}>
                 <Text style={styles.moodEmoji}>{mood?.emoji || '😊'}</Text>
               </View>

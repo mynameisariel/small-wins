@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,14 +69,12 @@ export const SettingsScreen: React.FC = () => {
       setNotificationHour(hour);
       setNotificationMinute(minute);
       
-      // Silent update - no alert to avoid interrupting the picker experience
       console.log(`Reminder updated to ${formatTime(hour, minute)}`);
     } catch (error) {
       console.error('Error updating notification:', error);
       Alert.alert('Error', 'Failed to update reminder time');
     }
   };
-
 
   const formatTime = (hour: number, minute: number) => {
     const period = hour >= 12 ? 'PM' : 'AM';
@@ -129,7 +126,6 @@ export const SettingsScreen: React.FC = () => {
     );
   };
 
-
   const SettingSection: React.FC<{ title: string; children: React.ReactNode }> = ({
     title,
     children,
@@ -152,34 +148,6 @@ export const SettingsScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Theme Settings */}
-        {/* <SettingSection title="Appearance">
-          <View style={styles.themeButtons}>
-            {(['light', 'dark', 'auto'] as const).map((t) => (
-              <TouchableOpacity
-                key={t}
-                style={[
-                  styles.themeButton,
-                  {
-                    backgroundColor: theme === t ? colors.primary : colors.card,
-                    borderColor: colors.border,
-                  },
-                ]}
-                onPress={() => setTheme(t)}
-              >
-                <Text
-                  style={[
-                    styles.themeButtonText,
-                    { color: theme === t ? '#FFFFFF' : colors.text },
-                  ]}
-                >
-                  {t === 'light' ? '☀️ Light' : t === 'dark' ? '🌙 Dark' : '🔄 Auto'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </SettingSection> */}
-
         {/* Notification Time */}
         <SettingSection title="Daily Reminders">
           <TimePicker
@@ -194,7 +162,7 @@ export const SettingsScreen: React.FC = () => {
               }
               updateTimerRef.current = setTimeout(() => {
                 updateNotificationTime(hour, minute);
-              }, 1000); // Update 1 second after user stops scrolling
+              }, 1000);
             }}
           />
         </SettingSection>
@@ -202,10 +170,10 @@ export const SettingsScreen: React.FC = () => {
         {/* Data Management */}
         <SettingSection title="Data">
           <TouchableOpacity
-            style={[styles.testButton, { borderColor: colors.buttonPrimary, backgroundColor: colors.cardBase }]}
+            style={[styles.testButton, { borderColor: colors.tabActive, backgroundColor: colors.cardBase }]}
             onPress={handleGenerateTestData}
           >
-            <Text style={[styles.testButtonText, { color: colors.buttonPrimary }]}>
+            <Text style={[styles.testButtonText, { color: colors.tabActive }]}>
               🧪 Generate Test Data (2 months)
             </Text>
           </TouchableOpacity>
@@ -257,41 +225,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-  },
-  themeButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  themeButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  themeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  currentTime: {
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  timeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  timeOption: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  timeText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   testButton: {
     borderWidth: 2,
