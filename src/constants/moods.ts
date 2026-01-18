@@ -29,7 +29,7 @@ export const MOODS = [
   { value: 8, label: 'Anxious', color: '#EC4899', key: 'anxious' },
   { value: 9, label: 'Angry', color: '#DC2626', key: 'angry' },
   { value: 10, label: 'Sleepy', color: '#8B5CF6', key: 'sleepy' },
-  { value: 11, label: 'Confident', color: '#06B6D4', key: 'confident' },
+  { value: 11, label: 'Confident', color: '#3f261c', key: 'confident' },
   { value: 12, label: 'Numb', color: '#64748B', key: 'numb' },
 ];
 
