@@ -128,19 +128,19 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 32,
+    fontSize: 52,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   date: {
-    fontSize: 16,
+    fontSize: 25,
   },
   reflectionCard: {
     marginBottom: 24,
     minHeight: 120,
   },
   reflectionText: {
-    fontSize: 18,
+    fontSize: 22,
     lineHeight: 28,
   },
   moodContainer: {
