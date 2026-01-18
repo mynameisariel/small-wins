@@ -151,6 +151,7 @@ export const StatsScreen: React.FC = () => {
               monthTextColor: colors.textPrimary,
               textMonthFontWeight: 'bold',
               textMonthFontSize: 18,
+              arrowColor: colors.accentMuted, // Month navigation arrows
             }}
             style={[styles.calendar, { backgroundColor: colors.cardBase }]}
           />
