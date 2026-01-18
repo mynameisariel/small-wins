@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { MOODS } from '../constants/moods';
+import { MOODS, getMoodImage } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
+import { Image } from 'react-native';
 
 export const MoodCheckInScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -38,15 +39,15 @@ export const MoodCheckInScreen: React.FC = () => {
     
     if (editMode) {
       // Edit mode: navigate to reflection edit screen with existing data
-      navigation.navigate('ReflectionCheckInEdit' as never, {
+      (navigation as any).navigate('ReflectionCheckInEdit', {
         mood: selectedMood,
         highlight: existingHighlight,
         editMode: true,
         date: existingDate,
-      } as never);
+      });
     } else {
       // Daily flow: navigate to reflection check-in
-      navigation.navigate('ReflectionCheckIn' as never, { mood: selectedMood } as never);
+      (navigation as any).navigate('ReflectionCheckIn', { mood: selectedMood });
     }
   };
 
@@ -92,7 +93,13 @@ export const MoodCheckInScreen: React.FC = () => {
                     },
                   ]}
                 >
-                  <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+                  {getMoodImage(mood.key || mood.label.toLowerCase()) ? (
+                    <Image
+                      source={getMoodImage(mood.key || mood.label.toLowerCase())!}
+                      style={styles.moodImage}
+                      resizeMode="contain"
+                    />
+                  ) : null}
                 </View>
                 <Text
                   style={[
@@ -177,8 +184,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
   },
-  moodEmoji: {
-    fontSize: 32,
+  moodImage: {
+    width: 48,
+    height: 48,
   },
   moodLabel: {
     fontSize: 14,

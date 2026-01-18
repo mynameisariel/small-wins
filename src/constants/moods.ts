@@ -1,18 +1,42 @@
+import { ImageSourcePropType } from 'react-native';
+
+// Centralized mood image mapping
+// Note: If an image is missing, it will be handled gracefully in components
+export const MOOD_IMAGES: Record<string, ImageSourcePropType> = {
+  happy: require('../../assets/happy.png'),
+  disappointed: require('../../assets/disappointed.png'),
+  content: require('../../assets/content.png'),
+  sad: require('../../assets/sad.png'),
+  tired: require('../../assets/tired.png'),
+  normal: require('../../assets/normal.png'),
+  // hurt.png doesn't exist in assets - using sad.png as fallback
+  hurt: require('../../assets/sad.png'),
+  anxious: require('../../assets/anxious.png'),
+  angry: require('../../assets/angry.png'),
+  sleepy: require('../../assets/sleepy.png'),
+  confident: require('../../assets/confident.png'),
+  numb: require('../../assets/numb.png'),
+};
+
 export const MOODS = [
-  { value: 1, emoji: '😊', label: 'Happy', color: '#F59E0B' },
-  { value: 2, emoji: '😔', label: 'Disappointed', color: '#6B7280' },
-  { value: 3, emoji: '😌', label: 'Content', color: '#10B981' },
-  { value: 4, emoji: '😢', label: 'Sad', color: '#3B82F6' },
-  { value: 5, emoji: '😴', label: 'Tired', color: '#6366F1' },
-  { value: 6, emoji: '😐', label: 'Normal', color: '#9CA3AF' },
-  { value: 7, emoji: '😟', label: 'Hurt', color: '#EF4444' },
-  { value: 8, emoji: '😰', label: 'Anxious', color: '#EC4899' },
-  { value: 9, emoji: '😠', label: 'Angry', color: '#DC2626' },
-  { value: 10, emoji: '🥱', label: 'Sleepy', color: '#8B5CF6' },
-  { value: 11, emoji: '😎', label: 'Confident', color: '#06B6D4' },
-  { value: 12, emoji: '😑', label: 'Numb', color: '#64748B' },
+  { value: 1, label: 'Happy', color: '#F59E0B', key: 'happy' },
+  { value: 2, label: 'Disappointed', color: '#6B7280', key: 'disappointed' },
+  { value: 3, label: 'Content', color: '#10B981', key: 'content' },
+  { value: 4, label: 'Sad', color: '#3B82F6', key: 'sad' },
+  { value: 5, label: 'Tired', color: '#6366F1', key: 'tired' },
+  { value: 6, label: 'Normal', color: '#9CA3AF', key: 'normal' },
+  { value: 7, label: 'Hurt', color: '#EF4444', key: 'hurt' },
+  { value: 8, label: 'Anxious', color: '#EC4899', key: 'anxious' },
+  { value: 9, label: 'Angry', color: '#DC2626', key: 'angry' },
+  { value: 10, label: 'Sleepy', color: '#8B5CF6', key: 'sleepy' },
+  { value: 11, label: 'Confident', color: '#06B6D4', key: 'confident' },
+  { value: 12, label: 'Numb', color: '#64748B', key: 'numb' },
 ];
 
 export const getMoodById = (value: number) => {
   return MOODS.find(m => m.value === value) || MOODS[5]; // Default to Normal
+};
+
+export const getMoodImage = (moodKey: string): ImageSourcePropType | null => {
+  return MOOD_IMAGES[moodKey.toLowerCase()] || null;
 };

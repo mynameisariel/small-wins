@@ -11,7 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
-import { getMoodById } from '../constants/moods';
+import { getMoodById, getMoodImage } from '../constants/moods';
+import { Image } from 'react-native';
 
 export const WinsListScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -51,9 +52,13 @@ export const WinsListScreen: React.FC = () => {
           <Text style={styles.entryDate}>
             {formatDisplayDate(item.date)}
           </Text>
-          {mood && (
-            <View style={[styles.moodCircle, { backgroundColor: mood.color }]}>
-              <Text style={styles.moodEmoji}>{mood.emoji}</Text>
+          {mood && getMoodImage(mood.key || mood.label.toLowerCase()) && (
+            <View style={styles.moodCircle}>
+              <Image
+                source={getMoodImage(mood.key || mood.label.toLowerCase())!}
+                style={styles.moodImage}
+                resizeMode="contain"
+              />
             </View>
           )}
         </View>
@@ -180,9 +185,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.05)',
   },
-  moodEmoji: {
-    fontSize: 18,
+  moodImage: {
+    width: 24,
+    height: 24,
   },
   entryHighlight: {
     fontSize: 16,

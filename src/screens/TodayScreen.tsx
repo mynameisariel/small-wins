@@ -13,6 +13,7 @@ import { getEntryByDate, Entry } from '../db/database';
 import { getMoodById } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
 import { BlobCard } from '../components/BlobCard';
+import { MoodIcon } from '../components/MoodIcon';
 
 export const TodayScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -34,29 +35,29 @@ export const TodayScreen: React.FC = () => {
   const handleEditReflection = () => {
     if (entry) {
       // Navigate to edit screen in nested stack (tabs stay visible)
-      navigation.navigate('ReflectionCheckInEdit' as never, {
+      (navigation as any).navigate('ReflectionCheckInEdit', {
         mood: entry.mood,
         highlight: entry.highlight,
         editMode: true,
         date: todayDate,
-      } as never);
+      });
     } else {
       // Shouldn't happen, but fallback
-      navigation.navigate('MoodCheckInEdit' as never);
+      (navigation as any).navigate('MoodCheckInEdit');
     }
   };
 
   const handleEditMood = () => {
     if (entry) {
       // Navigate to mood edit screen in nested stack (tabs stay visible)
-      navigation.navigate('MoodCheckInEdit' as never, {
+      (navigation as any).navigate('MoodCheckInEdit', {
         existingMood: entry.mood,
         existingHighlight: entry.highlight,
         existingDate: todayDate,
         editMode: true,
-      } as never);
+      });
     } else {
-      navigation.navigate('MoodCheckInEdit' as never);
+      (navigation as any).navigate('MoodCheckInEdit');
     }
   };
 
@@ -107,11 +108,7 @@ export const TodayScreen: React.FC = () => {
             style={styles.moodContainer}
             activeOpacity={0.7}
           >
-            <View style={styles.moodWrapper}>
-              <View style={[styles.moodBlob, { backgroundColor: colors.cardBase }]}>
-                <Text style={styles.moodEmoji}>{mood?.emoji || '😊'}</Text>
-              </View>
-            </View>
+            <MoodIcon moodValue={entry.mood} size="large" showBlob={true} />
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -153,21 +150,6 @@ const styles = StyleSheet.create({
   moodWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  moodBlob: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    // Irregular blob shape simulation
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 45,
-    borderBottomLeftRadius: 50,
-    borderBottomRightRadius: 30,
-  },
-  moodEmoji: {
-    fontSize: 40,
   },
   emptyContainer: {
     alignItems: 'center',

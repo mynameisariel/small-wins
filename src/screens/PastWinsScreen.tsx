@@ -8,12 +8,14 @@ import {
   Dimensions,
   FlatList,
   TextInput,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
 import { formatDisplayDate } from '../db/dateUtils';
-import { getMoodById } from '../constants/moods';
+import { getMoodById, getMoodImage } from '../constants/moods';
+import { Image } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NOTE_WIDTH = SCREEN_WIDTH * 0.8;
@@ -196,7 +198,7 @@ export const PastWinsScreen: React.FC = () => {
         <Animated.View
           key={entry.id}
           style={[
-            styles.noteCard,
+            styles.noteCardContainer,
             {
               transform: [
                 { translateX: isTopNote ? translateX : offsetX },
@@ -209,19 +211,29 @@ export const PastWinsScreen: React.FC = () => {
             },
           ]}
         >
-          <View style={styles.noteHeader}>
-            <Text style={styles.noteDate}>
-              {formatDisplayDate(entry.date)}
+          <ImageBackground
+            source={require('../../assets/Vector.png')}
+            style={styles.noteCard}
+            resizeMode="cover"
+          >
+            <View style={styles.noteHeader}>
+              <Text style={styles.noteDate}>
+                {formatDisplayDate(entry.date)}
+              </Text>
+              {mood && getMoodImage(mood.key || mood.label.toLowerCase()) && (
+                <View style={styles.moodIndicator}>
+                  <Image
+                    source={getMoodImage(mood.key || mood.label.toLowerCase())!}
+                    style={styles.moodImage}
+                    resizeMode="contain"
+                  />
+                </View>
+              )}
+            </View>
+            <Text style={styles.noteText}>
+              {entry.highlight}
             </Text>
-            {mood && (
-              <View style={styles.moodIndicator}>
-                <Text style={styles.moodEmoji}>{mood.emoji}</Text>
-              </View>
-            )}
-          </View>
-          <Text style={styles.noteText}>
-            {entry.highlight}
-          </Text>
+          </ImageBackground>
         </Animated.View>
       );
     }
@@ -357,21 +369,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  noteCard: {
+  noteCardContainer: {
     position: 'absolute',
     width: NOTE_WIDTH,
     minHeight: NOTE_HEIGHT * 0.6,
     maxHeight: NOTE_HEIGHT,
-    borderRadius: 16,
-    padding: 24,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 5,
+  },
+  noteCard: {
+    width: '100%',
+    height: '100%',
+    minHeight: NOTE_HEIGHT * 0.6,
+    padding: 24,
+    justifyContent: 'space-between',
   },
   noteHeader: {
     flexDirection: 'row',
@@ -392,14 +406,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  moodEmoji: {
-    fontSize: 20,
+  moodImage: {
+    width: 24,
+    height: 24,
   },
   noteText: {
     fontSize: 18,
     lineHeight: 28,
     fontWeight: '400',
-    color: '#111827',
+    color: '#6B5B4C', // Use theme textPrimary color for visibility on Vector.png
   },
   tapZones: {
     position: 'absolute',
