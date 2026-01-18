@@ -161,7 +161,6 @@ export const StatsScreen: React.FC = () => {
           <StatCard
             title="Current Streak"
             value={stats.currentStreak}
-            subtitle={stats.currentStreak > 0 ? 'Keep it up!' : ''}
             iconSource={require('../../assets/daystreak.png')}
           />
           <StatCard
