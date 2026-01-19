@@ -60,6 +60,8 @@ const getBlobStyle = (variant: string) => {
         borderTopRightRadius: 45,
         borderBottomLeftRadius: 50,
         borderBottomRightRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
       };
     default:
       return baseStyle;

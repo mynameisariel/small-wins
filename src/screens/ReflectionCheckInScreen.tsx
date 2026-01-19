@@ -51,8 +51,8 @@ export const ReflectionCheckInScreen: React.FC = () => {
 
       // Navigate based on mode
       if (editMode) {
-        // Edit mode: go back to Today tab (TodayMain screen)
-        navigation.navigate('TodayMain' as never);
+        // Edit mode: go back to Today screen (pop current screen)
+        navigation.goBack();
       } else {
         // First-time daily flow: Navigate to MainTabs with Stats tab
         navigation.reset({

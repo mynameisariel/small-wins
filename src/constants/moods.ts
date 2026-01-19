@@ -10,7 +10,7 @@ export const MOOD_IMAGES: Record<string, ImageSourcePropType> = {
   tired: require('../../assets/tired.png'),
   normal: require('../../assets/normal.png'),
   // hurt.png doesn't exist in assets - using sad.png as fallback
-  hurt: require('../../assets/sad.png'),
+  hurt: require('../../assets/hurt.png'),
   anxious: require('../../assets/anxious.png'),
   angry: require('../../assets/angry.png'),
   sleepy: require('../../assets/sleepy.png'),

@@ -16,7 +16,7 @@ const getSize = (size: string) => {
     case 'small':
       return { width: 40, height: 40, iconSize: 24 };
     case 'large':
-      return { width: 100, height: 100, iconSize: 60 };
+      return { width: 180, height: 180, iconSize: 120 };
     default: // medium
       return { width: 60, height: 60, iconSize: 36 };
   }
@@ -47,8 +47,8 @@ export const MoodIcon: React.FC<MoodIconProps> = ({
 
   if (showBlob) {
     return (
-      <BlobCard variant="mood" style={{ width, height }}>
-        <View style={styles.iconContainer}>
+      <BlobCard variant="mood" style={{ width, height, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={[styles.iconContainer, { width: '100%', height: '100%' }]}>
           {iconElement}
         </View>
       </BlobCard>

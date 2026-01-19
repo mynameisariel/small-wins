@@ -103,13 +103,15 @@ export const TodayScreen: React.FC = () => {
 
         {/* Mood Icon - Tappable */}
         {entry.mood && (
-          <TouchableOpacity
-            onPress={handleEditMood}
-            style={styles.moodContainer}
-            activeOpacity={0.7}
-          >
-            <MoodIcon moodValue={entry.mood} size="large" showBlob={true} />
-          </TouchableOpacity>
+          <View style={styles.moodIconWrapper}>
+            <TouchableOpacity
+              onPress={handleEditMood}
+              style={styles.moodContainer}
+              activeOpacity={0.7}
+            >
+              <MoodIcon moodValue={entry.mood} size="large" showBlob={true} />
+            </TouchableOpacity>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -143,9 +145,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 28,
   },
+  moodIconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    marginTop: 32,
+    marginBottom: 20,
+  },
   moodContainer: {
-    alignItems: 'flex-start',
-    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   moodWrapper: {
     alignItems: 'center',

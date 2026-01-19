@@ -288,12 +288,21 @@ export const generateTestData = async (): Promise<void> => {
 
     const entries: Array<{ date: string; mood: number; highlight: string }> = [];
     const currentDate = new Date(twoMonthsAgo);
+    const todayDateStr = getTodayLocalDate();
 
     // Generate entries for the past ~60 days, but skip some days randomly (70% fill rate)
-    while (currentDate <= today) {
+    // Exclude today's date from test data generation
+    while (currentDate < today) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      
+      // Skip today's date if it somehow gets included
+      if (dateStr === todayDateStr) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+      
       // Skip about 30% of days to make it realistic
       if (Math.random() > 0.3) {
-        const dateStr = currentDate.toISOString().split('T')[0];
         const mood = getRandomMood();
         const highlight = highlights[Math.floor(Math.random() * highlights.length)];
         

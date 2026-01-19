@@ -5,12 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { MOODS, getMoodImage } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
 import { Image } from 'react-native';
+import { upsertEntry } from '../db/database';
+import { getTodayLocalDate } from '../db/dateUtils';
 
 export const MoodCheckInScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -32,13 +35,24 @@ export const MoodCheckInScreen: React.FC = () => {
     }
   }, [existingMood]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedMood === null) {
       return; // Disabled button handles this
     }
     
-    if (editMode) {
-      // Edit mode: navigate to reflection edit screen with existing data
+    if (editMode && existingHighlight) {
+      // Editing mood only from Today screen: save mood and go back
+      try {
+        const entryDate = existingDate || getTodayLocalDate();
+        await upsertEntry(entryDate, selectedMood, existingHighlight);
+        // Navigate back to Today screen
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error saving mood:', error);
+        Alert.alert('Error', 'Failed to save your mood. Please try again.');
+      }
+    } else if (editMode) {
+      // Edit mode without existing highlight: navigate to reflection edit screen
       (navigation as any).navigate('ReflectionCheckInEdit', {
         mood: selectedMood,
         highlight: existingHighlight,
@@ -134,7 +148,7 @@ export const MoodCheckInScreen: React.FC = () => {
               { color: selectedMood !== null ? colors.buttonPrimaryText : colors.textTertiary },
             ]}
           >
-            {editMode ? 'Next' : 'Save'}
+            {editMode && existingHighlight ? 'Save' : editMode ? 'Next' : 'Save'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
