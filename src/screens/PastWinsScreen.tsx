@@ -8,6 +8,7 @@ import {
   Dimensions,
   FlatList,
   TextInput,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -40,7 +41,7 @@ export const PastWinsScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<'deck' | 'list'>('deck');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredEntries, setFilteredEntries] = useState<Entry[]>([]);
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(1)).current; // Initialize to 1 so first card is at position 0
 
   const loadAndShuffle = async () => {
     const entries = await getEntriesWithHighlights();
@@ -49,7 +50,7 @@ export const PastWinsScreen: React.FC = () => {
     setAllEntries(entries);
     setFilteredEntries(entries);
     setCurrentIndex(0);
-    slideAnim.setValue(0);
+    slideAnim.setValue(1); // Initialize to 1 so first card renders at position 0
   };
 
   useFocusEffect(
@@ -87,16 +88,11 @@ export const PastWinsScreen: React.FC = () => {
     }
   };
 
-  // Trigger animation when index changes (for initial load)
+  // Initialize animation when entries are loaded
   useEffect(() => {
-    if (currentIndex > 0 && shuffledEntries.length > 0) {
-      slideAnim.setValue(0);
-      Animated.spring(slideAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }).start();
+    if (shuffledEntries.length > 0 && currentIndex === 0) {
+      // Ensure first card is at position 0 (fully visible)
+      slideAnim.setValue(1);
     }
   }, [shuffledEntries.length]);
 
@@ -174,31 +170,106 @@ export const PastWinsScreen: React.FC = () => {
       );
     }
 
-    // Show up to 3 notes: current + next 2 (for stacked effect)
-    const visibleCount = Math.min(3, shuffledEntries.length - currentIndex);
-    const notes = [];
+    // Single entry case
+    if (shuffledEntries.length === 1) {
+      const entry = shuffledEntries[0];
+      const mood = entry.mood ? getMoodById(entry.mood) : null;
+      return (
+        <View style={styles.stackContainer}>
+          <View style={styles.noteCardContainer} pointerEvents="none">
+            <View style={[styles.noteCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]} pointerEvents="none">
+              <View style={styles.noteHeader}>
+                <Text style={[styles.noteDate, { color: colors.textSecondary }]}>
+                  {formatDisplayDate(entry.date)}
+                </Text>
+                {mood && getMoodImage(mood.key || mood.label.toLowerCase()) && (
+                  <View style={styles.moodIndicator}>
+                    <Image
+                      source={getMoodImage(mood.key || mood.label.toLowerCase())!}
+                      style={styles.moodImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                )}
+              </View>
+              <View style={styles.singleEntryContent}>
+                <Text style={[styles.noteText, { color: colors.textPrimary }]}>
+                  {entry.highlight}
+                </Text>
+                <Text style={[styles.singleEntryHelper, { color: colors.textSecondary }]}>
+                  keep track of more wins to see more past highlights!
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      );
+    }
 
-    for (let i = 0; i < visibleCount; i++) {
+    // Multiple entries: render current card + next 2 cards behind it
+    const notes = [];
+    const currentEntry = shuffledEntries[currentIndex];
+    
+    // Render the current (top) card
+    const currentMood = currentEntry.mood ? getMoodById(currentEntry.mood) : null;
+    const currentRotation = getRotation(currentEntry.id, 0);
+    
+    notes.push(
+        <Animated.View
+          key={currentEntry.id}
+          style={[
+            styles.noteCardContainer,
+            {
+              transform: [
+                {
+                  translateX: slideAnim.interpolate({
+                    inputRange: [-1, 0, 1],
+                    outputRange: [-SCREEN_WIDTH, SCREEN_WIDTH, 0],
+                  }),
+                },
+                { translateY: 0 },
+                { rotateZ: `${currentRotation}deg` },
+                { scale: 1 },
+              ],
+              opacity: 1,
+              zIndex: 10,
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <View style={[styles.noteCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]} pointerEvents="none">
+          <View style={styles.noteHeader}>
+            <Text style={[styles.noteDate, { color: colors.textSecondary }]}>
+              {formatDisplayDate(currentEntry.date)}
+            </Text>
+            {currentMood && getMoodImage(currentMood.key || currentMood.label.toLowerCase()) && (
+              <View style={styles.moodIndicator}>
+                <Image
+                  source={getMoodImage(currentMood.key || currentMood.label.toLowerCase())!}
+                  style={styles.moodImage}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
+          </View>
+          <Text style={[styles.noteText, { color: colors.textPrimary }]}>
+            {currentEntry.highlight}
+          </Text>
+        </View>
+      </Animated.View>
+    );
+
+    // Render up to 2 cards behind the current one (for stacked effect)
+    const behindCount = Math.min(2, shuffledEntries.length - currentIndex - 1);
+    for (let i = 1; i <= behindCount; i++) {
       const entryIndex = currentIndex + i;
       const entry = shuffledEntries[entryIndex];
-      const isTopNote = i === 0;
+      const mood = entry.mood ? getMoodById(entry.mood) : null;
       const rotation = getRotation(entry.id, i);
       const offsetX = i * 8;
       const offsetY = i * 8;
       const scale = 1 - i * 0.03;
       const opacity = 1 - i * 0.15;
-
-      const mood = entry.mood ? getMoodById(entry.mood) : null;
-
-      // Animation only for the top note when transitioning
-      const translateX = isTopNote
-        ? slideAnim.interpolate({
-            inputRange: [-1, 0, 1],
-            outputRange: [-SCREEN_WIDTH, SCREEN_WIDTH, 0],
-          })
-        : offsetX;
-      const translateY = offsetY;
-      const rotateZ = `${rotation}deg`;
 
       notes.push(
         <Animated.View
@@ -207,17 +278,18 @@ export const PastWinsScreen: React.FC = () => {
             styles.noteCardContainer,
             {
               transform: [
-                { translateX: isTopNote ? translateX : offsetX },
-                { translateY },
-                { rotateZ },
-                { scale: isTopNote ? 1 : scale },
+                { translateX: offsetX },
+                { translateY: offsetY },
+                { rotateZ: `${rotation}deg` },
+                { scale },
               ],
-              opacity: isTopNote ? 1 : opacity,
-              zIndex: visibleCount - i,
+              opacity,
+              zIndex: 10 - i,
             },
           ]}
+          pointerEvents="none"
         >
-          <View style={[styles.noteCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]}>
+          <View style={[styles.noteCard, { backgroundColor: colors.cardBase, borderColor: colors.border }]} pointerEvents="none">
             <View style={styles.noteHeader}>
               <Text style={[styles.noteDate, { color: colors.textSecondary }]}>
                 {formatDisplayDate(entry.date)}
@@ -280,28 +352,29 @@ export const PastWinsScreen: React.FC = () => {
 
       {viewMode === 'deck' ? (
         <>
-          {/* Notes Stack Container */}
+          {/* Notes Stack Container with Full-Screen Tap Handler */}
           <View style={styles.contentArea}>
-            {renderNoteStack()}
-          </View>
-
-          {/* Tap Zones - Full Height */}
-          {shuffledEntries.length > 0 && (
-            <View style={styles.tapZones}>
-              <TouchableOpacity
-                style={[styles.tapZone, styles.leftZone]}
-                onPress={handlePrev}
-                disabled={!canGoPrev}
-                activeOpacity={canGoPrev ? 0.3 : 1}
-              />
-              <TouchableOpacity
-                style={[styles.tapZone, styles.rightZone]}
-                onPress={handleNext}
-                disabled={!canGoNext}
-                activeOpacity={canGoNext ? 0.3 : 1}
-              />
+            {/* Cards rendered behind tap zones */}
+            <View style={styles.contentAreaInner} pointerEvents="box-none">
+              {renderNoteStack()}
             </View>
-          )}
+            
+            {/* Full-screen tap zones - left and right halves */}
+            {shuffledEntries.length > 0 && (
+              <View style={styles.tapZonesContainer} pointerEvents="box-none">
+                <Pressable
+                  style={styles.tapZoneLeft}
+                  onPress={handlePrev}
+                  disabled={!canGoPrev}
+                />
+                <Pressable
+                  style={styles.tapZoneRight}
+                  onPress={handleNext}
+                  disabled={!canGoNext}
+                />
+              </View>
+            )}
+          </View>
         </>
       ) : (
         <View style={styles.listContainer}>
@@ -363,6 +436,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 40,
     paddingHorizontal: 20,
+    position: 'relative',
+  },
+  contentAreaInner: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tapZonesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+  },
+  tapZoneLeft: {
+    flex: 1,
+  },
+  tapZoneRight: {
+    flex: 1,
   },
   stackContainer: {
     width: NOTE_WIDTH,
@@ -417,19 +511,10 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     fontWeight: '400',
   },
-  tapZones: {
-    position: 'absolute',
-    top: 100,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-  },
-  tapZone: {
+  singleEntryContent: {
     flex: 1,
+    justifyContent: 'space-between',
   },
-  leftZone: {},
-  rightZone: {},
   listContainer: {
     flex: 1,
   },
@@ -515,5 +600,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  singleEntryHelper: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 16,
+    fontStyle: 'italic',
   },
 });

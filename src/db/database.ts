@@ -238,6 +238,7 @@ export const generateTestData = async (): Promise<void> => {
       'Had a great conversation with a friend',
       'Completed a workout at the gym',
       'Cooked a delicious homemade meal',
+      'Got 8 hours of sleep',
       'Learned something new today',
       'Spent quality time with family',
       'Finished a work project I was proud of',
