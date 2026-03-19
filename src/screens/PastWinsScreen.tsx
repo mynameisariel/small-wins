@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getEntriesWithHighlights, Entry } from '../db/database';
-import { formatDisplayDate } from '../db/dateUtils';
+import { getTodayLocalDate, formatDisplayDate } from '../db/dateUtils';
 import { getMoodById, getMoodImage } from '../constants/moods';
 import { Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
@@ -152,16 +152,24 @@ export const PastWinsScreen: React.FC = () => {
     if (shuffledEntries.length === 0) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>
+          <Text style={[styles.emptyTitle, {color:colors.textPrimary}]}>
             No wins yet!
           </Text>
-          <Text style={styles.emptyMessage}>
+          <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
             Start recording your daily highlights to see them here.
           </Text>
           <TouchableOpacity
-            style={styles.emptyButton}
+            style={[styles.emptyButton, { backgroundColor: colors.buttonPrimary }]}
             onPress={() => {
-              navigation.navigate('Today' as never);
+              const todayDate = getTodayLocalDate();
+              // Jump into the Today tab's nested stack and start the Mood + Reflection flow.
+              (navigation as any).navigate('Today', {
+                screen: 'MoodCheckInEdit',
+                params: {
+                  editMode: true,
+                  existingDate: todayDate,
+                },
+              });
             }}
           >
             <Text style={styles.emptyButtonText}>Write Today's Win</Text>
@@ -392,11 +400,29 @@ export const PastWinsScreen: React.FC = () => {
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>
+                <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
                   {searchQuery
                     ? 'No wins found'
                     : 'No wins yet!\nStart recording your daily highlights.'}
                 </Text>
+
+                {!searchQuery && allEntries.length === 0 && (
+                  <TouchableOpacity
+                    style={[styles.emptyButton, { backgroundColor: colors.buttonPrimary }]}
+                    onPress={() => {
+                      const todayDate = getTodayLocalDate();
+                      (navigation as any).navigate('Today', {
+                        screen: 'MoodCheckInEdit',
+                        params: {
+                          editMode: true,
+                          existingDate: todayDate,
+                        },
+                      });
+                    }}
+                  >
+                    <Text style={[styles.emptyButtonText, { color: colors.buttonPrimaryText }]}>Write Today's Win</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             }
           />

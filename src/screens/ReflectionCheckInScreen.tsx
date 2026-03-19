@@ -51,8 +51,14 @@ export const ReflectionCheckInScreen: React.FC = () => {
 
       // Navigate based on mode
       if (editMode) {
-        // Edit mode: go back to Today screen (pop current screen)
-        navigation.goBack();
+        // Edit mode: always return to the Today screen root.
+        // (This matters when we come from MoodCheckInEdit -> ReflectionCheckInEdit.)
+        const navAny = navigation as any;
+        if (typeof navAny.popToTop === 'function') {
+          navAny.popToTop();
+        } else {
+          navigation.goBack();
+        }
       } else {
         // First-time daily flow: Navigate to MainTabs with Stats tab
         navigation.reset({

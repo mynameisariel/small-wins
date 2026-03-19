@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getTodayLocalDate, formatDisplayDate } from '../db/dateUtils';
-import { getEntryByDate, Entry } from '../db/database';
+import { getEntriesWithHighlights, getEntryByDate, Entry } from '../db/database';
 import { getMoodById } from '../constants/moods';
 import { useTheme } from '../context/ThemeContext';
 import { BlobCard } from '../components/BlobCard';
@@ -20,16 +20,25 @@ export const TodayScreen: React.FC = () => {
   const { colors } = useTheme();
   const [todayDate] = useState(getTodayLocalDate());
   const [entry, setEntry] = useState<Entry | null>(null);
+  const [hasAnyReflections, setHasAnyReflections] = useState<boolean | null>(null);
 
   const loadTodayEntry = async () => {
     const todayEntry = await getEntryByDate(todayDate);
     setEntry(todayEntry);
   };
 
+  const loadHasAnyReflections = async () => {
+    const highlights = await getEntriesWithHighlights();
+    setHasAnyReflections(highlights.length > 0);
+  };
+
   useFocusEffect(
     useCallback(() => {
+      // Keep these separate so the UI can render today entry ASAP.
+      // We still want to know whether the DB is completely empty for the "Write Today's Win" button.
       loadTodayEntry();
-    }, [])
+      loadHasAnyReflections();
+    }, [todayDate])
   );
 
   const handleEditReflection = () => {
@@ -61,6 +70,14 @@ export const TodayScreen: React.FC = () => {
     }
   };
 
+  const handleStartNewReflection = () => {
+    // "Edit flow" is used here so we stay within the Today tab stack.
+    (navigation as any).navigate('MoodCheckInEdit', {
+      editMode: true,
+      existingDate: todayDate,
+    });
+  };
+
   // If no entry exists, show empty state
   if (!entry) {
     return (
@@ -76,6 +93,18 @@ export const TodayScreen: React.FC = () => {
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               No entry yet for today
             </Text>
+
+            {hasAnyReflections === false && (
+              <TouchableOpacity
+                style={[styles.emptyButton, { backgroundColor: colors.buttonPrimary }]}
+                onPress={handleStartNewReflection}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.emptyButtonText, { color: colors.buttonPrimaryText }]}>
+                  Write Today's Win
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -168,5 +197,15 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  emptyButton: {
+    marginTop: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  emptyButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
